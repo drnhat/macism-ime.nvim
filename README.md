@@ -26,7 +26,7 @@ To get an input source ID, switch to it and run `macism` in a terminal, for exam
 
 ```lua
 {
-  "<your-github-username>/macism-ime.nvim",
+  "drnhat/macism-ime.nvim",
   lazy = false, -- load at startup so the original input source is captured immediately
   config = function()
     require("macism_ime").setup({

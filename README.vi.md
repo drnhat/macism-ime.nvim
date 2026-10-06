@@ -19,7 +19,7 @@ lazy.nvim:
 
 ```lua
 {
-  "<your-github-username>/macism-ime.nvim",
+  "drnhat/macism-ime.nvim",
   lazy = false,
   config = function()
     require("macism_ime").setup({
