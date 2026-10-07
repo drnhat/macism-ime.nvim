@@ -36,6 +36,7 @@ local defaults = {
     -- Vim regex (không phải Lua pattern): chữ cái tiếng Việt có dấu, không khớp Latin-1 khác
     pattern = [==[[àáâãèéêìíòóôõùúýÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝăĂđĐĩĨũŨơƠưƯ\u1ea0-\u1ef9]]==],
   },
+  macism = nil,           -- đường dẫn tới macism; nil = tự tìm trong PATH, rồi /opt/homebrew/bin, /usr/local/bin
   wait = nil,             -- ms chờ khi chuyển sang bộ gõ CJKV như XKey; nil = mặc định macism (150ms)
   timeout = 1500,         -- ms; macism treo quá lâu thì bỏ qua thay vì đơ nvim
   terminal = true,        -- true: terminal mode (:terminal) cũng được coi là typing mode
@@ -62,6 +63,7 @@ local state = {
   left = false,         -- đã trả input gốc khi thoát
   vi_regex = nil,       -- regex đã biên dịch của detect.pattern
   detect_broken = false,
+  bin = nil,            -- đường dẫn macism đã tìm được
 }
 
 ---------------------------------------------------------------------------
@@ -81,6 +83,23 @@ local function log(...)
   end
 end
 
+-- Tìm macism: đường dẫn do người dùng đặt -> PATH -> các thư mục Homebrew quen thuộc.
+-- (nvim chạy từ app GUI như Tridactyl/Alfred thường không có /opt/homebrew/bin trong PATH)
+local function find_macism()
+  if opts.macism and opts.macism ~= "" then
+    local p = vim.fn.expand(opts.macism)
+    if vim.fn.executable(p) == 1 then return p end
+    return nil
+  end
+  local p = vim.fn.exepath("macism")
+  if p ~= "" then return p end
+  for _, dir in ipairs({ "/opt/homebrew/bin", "/usr/local/bin", "/opt/local/bin" }) do
+    local c = dir .. "/macism"
+    if vim.fn.executable(c) == 1 then return c end
+  end
+  return nil
+end
+
 -- Chạy macism, trả về stdout (đã trim) hoặc nil nếu lỗi / quá timeout.
 local function run(args)
   if vim.system then
@@ -96,14 +115,14 @@ local function run(args)
 end
 
 local function current()
-  local id = run({ "macism" })
+  local id = run({ state.bin })
   if id == nil or id == "" then return nil end
   return id
 end
 
 local function switch(id)
   if not id or id == "" then return false end
-  local cmd = { "macism", id }
+  local cmd = { state.bin, id }
   if id == opts.normal then
     cmd[3] = "0" -- ABC không cần workaround của macism => đổi tức thì
   elseif opts.wait then
@@ -309,8 +328,9 @@ function M.setup(user)
   opts.detect = vim.tbl_extend("force", {}, defaults.detect, user.detect or {}) -- gộp từng khóa của detect
   state.vi_regex, state.detect_broken = nil, false
 
-  if vim.fn.executable("macism") == 0 then
-    vim.notify_once("macism_ime: không tìm thấy macism (brew install laishulu/homebrew/macism)", vim.log.levels.WARN)
+  state.bin = find_macism()
+  if not state.bin then
+    vim.notify_once("macism_ime: không tìm thấy macism (PATH, /opt/homebrew/bin, /usr/local/bin). Cài: brew install laishulu/homebrew/macism, hoặc đặt setup({ macism = \"/đường/dẫn/macism\" })", vim.log.levels.WARN)
     return
   end
 
@@ -354,6 +374,7 @@ function M.setup(user)
   vim.api.nvim_create_user_command("MacismImeInfo", function()
     vim.notify(table.concat({
       "enabled:     " .. tostring(state.enabled),
+      "macism:      " .. tostring(state.bin),
       "scope:       " .. tostring(opts.scope),
       "original:    " .. tostring(state.original),
       "last_insert: " .. tostring(state.last_insert),

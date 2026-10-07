@@ -1,6 +1,6 @@
 # macism-ime.nvim
 
-Automatically switch the macOS input source according to the Neovim mode, built on top of [macism](https://github.com/laishulu/macism).
+Automatically switch the macOS input source according to the Neovim mode, built on top of [macism][1].
 Made for Vietnamese typists (Telex/VNI engines such as XKey), but it works with any input source ID, including CJK.
 
 - **Normal / Visual / `:`** → ABC
@@ -15,14 +15,14 @@ Made for Vietnamese typists (Telex/VNI engines such as XKey), but it works with 
 ## Requirements
 
 - macOS, Neovim 0.10+ recommended
-- [macism](https://github.com/laishulu/macism): `brew install laishulu/homebrew/macism`
+- [macism][2]: `brew install laishulu/homebrew/macism`
 
 To get an input source ID, switch to it and run `macism` in a terminal, for example
 `com.apple.keylayout.ABC` or `com.codetay.inputmethod.XKey`.
 
 ## Installation
 
-[lazy.nvim](https://github.com/folke/lazy.nvim):
+[lazy.nvim][3]:
 
 ```lua
 {
@@ -52,6 +52,7 @@ require("macism_ime").setup({
     input = nil,         -- REQUIRED when enabled, e.g. "com.codetay.inputmethod.XKey"
     pattern = [[...]],   -- Vim regex of Vietnamese letters (see the source for the default)
   },
+  macism = nil,          -- path to the macism binary; nil = search PATH, then /opt/homebrew/bin and /usr/local/bin
   wait = nil,            -- ms macism waits after switching to a CJKV input source (nil = macism default, 150ms)
   timeout = 1500,        -- ms; a hung macism is abandoned instead of freezing Neovim
   terminal = true,       -- treat terminal mode as a typing mode
@@ -83,24 +84,33 @@ require("macism_ime").setup({
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `:MacismImeToggle` | Enable / disable automatic switching |
-| `:MacismImeInfo` | Show the original, remembered, target and current input source |
+| Command            | Description                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| `:MacismImeToggle` | Enable / disable automatic switching                           |
+| `:MacismImeInfo`   | Show the original, remembered, target and current input source |
 
 ## Troubleshooting
 
 - **The first keystrokes after `i` are typed in the old input source**: upgrade macism (`brew upgrade macism`) or increase the wait, e.g. `wait = 150`.
+- **"macism not found" when Neovim is launched from a GUI app** (browser editor integrations such as Tridactyl, Alfred, Raycast...): such processes get a minimal `PATH` without Homebrew. The plugin falls back to `/opt/homebrew/bin` and `/usr/local/bin`; for any other location set `macism = "/full/path/to/macism"`.
 - **Nothing happens when focusing the window inside tmux**: add `set -g focus-events on` to your tmux config.
 - Set `debug = true`, reproduce the problem and check `~/.local/state/nvim/ime.log`.
 
 ## Credits
 
-Built on [macism](https://github.com/laishulu/macism) by laishulu. Ideas from
-[auto-input-switch.nvim](https://github.com/amekusa/auto-input-switch.nvim),
-[vim-barbaric](https://github.com/rlue/vim-barbaric) and
-[im-select.nvim](https://github.com/keaising/im-select.nvim).
+Built on [macism][4] by laishulu. Ideas from
+[auto-input-switch.nvim][5],
+[vim-barbaric][6] and
+[im-select.nvim][7].
 
 ## License
 
 MIT
+
+[1]:	https://github.com/laishulu/macism
+[2]:	https://github.com/laishulu/macism
+[3]:	https://github.com/folke/lazy.nvim
+[4]:	https://github.com/laishulu/macism
+[5]:	https://github.com/amekusa/auto-input-switch.nvim
+[6]:	https://github.com/rlue/vim-barbaric
+[7]:	https://github.com/keaising/im-select.nvim

@@ -1,6 +1,6 @@
 # macism-ime.nvim (Tiếng Việt)
 
-Tự động chuyển bộ gõ trên macOS theo mode của Neovim, dựa trên [macism](https://github.com/laishulu/macism).
+Tự động chuyển bộ gõ trên macOS theo mode của Neovim, dựa trên [macism][1].
 Làm cho người gõ tiếng Việt (XKey, v.v.), nhưng dùng được với mọi input source ID.
 
 - **Normal / Visual / `:`** → ABC
@@ -30,12 +30,16 @@ lazy.nvim:
 }
 ```
 
-Danh sách đầy đủ các tùy chọn nằm trong [README.md](README.md#configuration).
+Danh sách đầy đủ các tùy chọn nằm trong [README.md][2].
 Lệnh: `:MacismImeToggle`, `:MacismImeInfo`.
 
 Mất phím đầu sau khi bấm `i`: chạy `brew upgrade macism` hoặc đặt `wait = 150`.
+Báo "không tìm thấy macism" khi nvim được gọi từ app GUI (Tridactyl, Alfred, Raycast...): các app này có `PATH` tối giản, thiếu Homebrew. Plugin tự tìm ở `/opt/homebrew/bin` và `/usr/local/bin`; chỗ khác thì đặt `macism = "/đường/dẫn/macism"`.
 Bật `debug = true` rồi xem `~/.local/state/nvim/ime.log` để biết chi tiết.
 
 ## Giấy phép
 
 MIT
+
+[1]:	https://github.com/laishulu/macism
+[2]:	README.md#configuration
